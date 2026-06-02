@@ -189,6 +189,14 @@ tr:hover td{background:rgba(91,107,46,0.025)}
   th,td{padding:0.6rem 0.7rem}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  // Replace these with your EmailJS credentials after setup
+  var EMAILJS_SERVICE_ID  = "service_i2w44cb";
+  var EMAILJS_TEMPLATE_ID = "template_eftbvbj";
+  var EMAILJS_PUBLIC_KEY  = "U5qnSED-k7pyFnyu2";
+  emailjs.init(EMAILJS_PUBLIC_KEY);
+</script>
 </head>
 <body>
 
@@ -319,7 +327,7 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 
 // ADMIN EMAILS — add your emails here
-const ADMIN_EMAILS = ['gabrielboos0@gmail.com','johann.hauenschild@gmail.com'];
+const ADMIN_EMAILS = ["johann.hauenschild@gmail.com", "gabrielboos0@gmail.com"];
 
 // ── HELPERS ──
 function toast(msg, dur=3000) {

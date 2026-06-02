@@ -615,6 +615,25 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
+  // Check if student is approved
+  if (studentData.status === 'pending_approval') {
+    document.getElementById('loadingScreen').innerHTML = `
+      <img class="loading-logo" src="" alt="Livable" style="height:52px">
+      <div style="font-family:'Lora',serif;font-size:1.1rem;color:#5C6B2E;text-align:center;max-width:340px;line-height:1.6">
+        Your application is currently under review.<br>
+        <span style="font-size:0.85rem;color:#8A8A72">We'll email you within 48 hours once approved.</span>
+      </div>
+      <a href="livable.html" style="font-size:0.78rem;color:#5C6B2E;text-transform:uppercase;letter-spacing:0.1em;margin-top:0.5rem">← Back to Livable</a>
+    `;
+    return;
+  }
+  if (studentData.status === 'rejected') {
+    alert('Your application was not approved. Please contact us for more information.');
+    await signOut(auth);
+    window.location.href = 'livable.html';
+    return;
+  }
+
   // Populate header
   document.getElementById('navAvatar').textContent    = initStr;
   document.getElementById('navName').textContent      = name;
