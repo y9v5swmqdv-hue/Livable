@@ -927,5 +927,25 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
 fadeEls.forEach(el => observer.observe(el));
 </script>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyBJEqDDQ0SfHe96gEEdDkgiYVx_92D0Ek",
+    authDomain: "livable-8d80a.firebaseapp.com",
+    projectId: "livable-8d80a",
+    storageBucket: "livable-8d80a.firebasestorage.app",
+    messagingSenderId: "227119375568",
+    appId: "1:227119375568:web:9f872bd999c3d680a32445",
+    measurementId: "G-FEL6P5T20V"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 </body>
 </html>
