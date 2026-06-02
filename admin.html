@@ -222,7 +222,7 @@ const ADMIN_EMAILS = ["johann.hauenschild@gmail.com", "gabrielboos0@gmail.com"];
 
 var studentsCache = {};
 
-// ── TOAST ──
+// -- TOAST --
 function toast(msg, dur) {
   dur = dur || 4000;
   var t = document.getElementById('toast');
@@ -261,7 +261,7 @@ function copyToClipboard(text) {
   }
 }
 
-// ── TABS ──
+// -- TABS --
 window.switchTab = function(name) {
   var names = ['requests','active','completed','students','designers'];
   document.querySelectorAll('.tab').forEach(function(t, i) {
@@ -272,7 +272,7 @@ window.switchTab = function(name) {
   });
 };
 
-// ── BUILD REQUESTS TABLE ──
+// -- BUILD REQUESTS TABLE --
 function buildRequestsTable(docs, containerId, showAssign) {
   var wrap = document.getElementById(containerId);
   if (!wrap) return;
@@ -332,7 +332,7 @@ window.copyLink = function(link) {
   toast('Chat link copied to clipboard.');
 };
 
-// ── ASSIGN PROJECT + SEND EMAIL ──
+// -- ASSIGN PROJECT + SEND EMAIL --
 window.assignProject = async function(projectId) {
   var sel = document.getElementById('sel-' + projectId);
   var uid = sel ? sel.value : '';
@@ -404,7 +404,7 @@ window.assignProject = async function(projectId) {
   }
 };
 
-// ── BUILD STUDENTS TABLE ──
+// -- BUILD STUDENTS TABLE --
 function buildStudentsTable(docs, containerId, isPending) {
   var wrap = document.getElementById(containerId);
   if (!wrap) return;
@@ -459,7 +459,7 @@ window.rejectStudent = async function(uid) {
   } catch(e) { toast('Error: ' + e.message); }
 };
 
-// ── AUTH ──
+// -- AUTH --
 onAuthStateChanged(auth, async function(user) {
   document.getElementById('loadingScreen').style.display = 'none';
 
@@ -524,7 +524,7 @@ onAuthStateChanged(auth, async function(user) {
   });
 });
 
-// ── ADMIN LOGIN ──
+// -- ADMIN LOGIN --
 document.getElementById('adminLoginBtn').addEventListener('click', async function() {
   var email    = document.getElementById('adminEmail').value.trim();
   var password = document.getElementById('adminPassword').value;
