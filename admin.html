@@ -298,11 +298,11 @@ function buildRequestsTable(docs, containerId, showAssign) {
     var assignCell;
     if (showAssign) {
       var linkHtml = data.chatLink
-        ? '<div class="link-box-label">Client chat link (click to copy)</div><div class="link-box" onclick="copyLink('' + data.chatLink + '')">' + data.chatLink + '</div>'
+        ? '<div class="link-box-label">Client chat link (click to copy)</div><div class="link-box" onclick="copyLink(this.dataset.link)" data-link="' + data.chatLink + '">' + data.chatLink + '</div>'
         : '';
       assignCell = '<td><div class="assign-wrap">'
         + '<select class="assign-select" id="sel-' + id + '">' + options + '</select>'
-        + '<button class="btn-assign" id="btn-' + id + '" onclick="assignProject('' + id + '')">Assign + Email</button>'
+        + '<button class="btn-assign" id="btn-' + id + '" onclick="assignProject(this.dataset.id)" data-id="' + id + '">Assign + Email</button>'
         + '</div>' + linkHtml + '</td>';
     } else {
       assignCell = '<td>' + (data.studentName || '-') + '</td>';
@@ -420,7 +420,7 @@ function buildStudentsTable(docs, containerId, isPending) {
     var ratingStr   = data.rating ? data.rating.toFixed(1) + ' *' : '-';
     var earningsStr = data.totalEarnings ? 'GBP ' + data.totalEarnings : 'GBP 0';
     var actionCell  = isPending
-      ? '<td><button class="btn-approve" onclick="approveStudent('' + id + '')">Approve</button><button class="btn-reject" onclick="rejectStudent('' + id + '')">Reject</button></td>'
+      ? '<td><button class="btn-approve" onclick="approveStudent(this.dataset.id)" data-id="' + id + '">Approve</button><button class="btn-reject" onclick="rejectStudent(this.dataset.id)" data-id="' + id + '">Reject</button></td>'
       : '<td>' + statusPill(data.status || 'active') + '</td>';
 
     rows += '<tr>'
