@@ -716,9 +716,9 @@ footer { background: var(--cream-dark); padding: 4rem 3rem; border-top: 1px soli
     <div class="login-card fade-in">
       <h3>Student Login</h3>
       <p class="sub">Access your projects, earnings, and messages.</p>
-      <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" placeholder="your@university.ac.uk"></div>
-      <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" placeholder="••••••••"></div>
-      <button class="btn-primary" style="width:100%;margin-top:0.5rem;">Login</button>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="loginEmail" placeholder="your@university.ac.uk"></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" id="loginPassword" class="form-input" placeholder="••••••••"></div>
+      <div id="login-error" style="color:#c0392b;font-size:0.78rem;margin-bottom:0.5rem;display:none;"></div><button id="loginBtn" class="btn-primary" style="width:100%;margin-top:0.2rem;">Login</button>
       <p style="font-size:0.75rem;color:var(--text-light);margin-top:1rem;text-align:center;">New designer? <a href="#for-students" style="color:var(--olive);">Apply to join →</a></p>
     </div>
     <div class="dashboard-preview fade-in fade-in-delay-2">
@@ -927,54 +927,64 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
 fadeEls.forEach(el => observer.observe(el));
 </script>
+
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
-  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyBJEqDDQ0SfHe96gEEdDkgiYVx_92D0Ek",
-    authDomain: "livable-8d80a.firebaseapp.com",
-    projectId: "livable-8d80a",
-    storageBucket: "livable-8d80a.firebasestorage.app",
+  import { initializeApp }                          from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword,
+           onAuthStateChanged }                     from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+
+  const cfg = {
+    apiKey:            "AIzaSyBJEqDDQ0SfHe96gEEdDkgiYVx_92D0Ek",
+    authDomain:        "livable-8d80a.firebaseapp.com",
+    projectId:         "livable-8d80a",
+    storageBucket:     "livable-8d80a.firebasestorage.app",
     messagingSenderId: "227119375568",
-    appId: "1:227119375568:web:9f872bd999c3d680a32445",
-    measurementId: "G-FEL6P5T20V"
+    appId:             "1:227119375568:web:9f872bd999c3d680a32445",
+    measurementId:     "G-FEL6P5T20V"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  
-  // 3. INITIALIZE FIRESTORE AND AUTH
-  const db = getFirestore(app);
+  const app  = initializeApp(cfg);
   const auth = getAuth(app);
 
-  // --- Handling the Login (Connecting the HTML elements) ---
-  const loginButton = document.getElementById('loginBtn');
-  const emailInput = document.getElementById('loginEmail');
-  const passwordInput = document.getElementById('loginPassword');
+  // Already signed-in? Skip straight to dashboard
+  onAuthStateChanged(auth, user => {
+    if (user) window.location.href = 'dashboard.html';
+  });
 
-  if (loginButton) {
-    loginButton.addEventListener('click', (e) => {
+  const btn    = document.getElementById('loginBtn');
+  const errBox = document.getElementById('login-error');
+
+  if (btn) {
+    btn.addEventListener('click', async e => {
       e.preventDefault();
+      const email    = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      errBox.style.display = 'none';
 
-      const email = emailInput.value;
-      const password = passwordInput.value;
+      if (!email || !password) {
+        errBox.textContent = 'Please enter your email and password.';
+        errBox.style.display = 'block';
+        return;
+      }
 
-      // Log in securely via Firebase Auth
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          const user = userCredential.user;
-          alert("Logged in successfully!");
-          
-          // Optional: Once logged in, you can pull profile data from Firestore using their unique ID
-          // const userDocRef = doc(db, "users", user.uid);
-        })
-        .catch((error) => {
-          console.error("Login Error: ", error.message);
-          alert("Error: " + error.message);
-        });
+      btn.textContent = 'Logging in…';
+      btn.disabled    = true;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        const msgs = {
+          'auth/user-not-found':  'No account found with that email.',
+          'auth/wrong-password':  'Incorrect password.',
+          'auth/invalid-email':   'Please enter a valid email address.',
+          'auth/too-many-requests': 'Too many attempts. Try again later.'
+        };
+        errBox.textContent     = msgs[err.code] || err.message;
+        errBox.style.display   = 'block';
+        btn.textContent        = 'Login';
+        btn.disabled           = false;
+      }
     });
   }
 </script>
