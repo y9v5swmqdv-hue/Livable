@@ -928,10 +928,10 @@ const observer = new IntersectionObserver((entries) => {
 fadeEls.forEach(el => observer.observe(el));
 </script>
 <script type="module">
-  // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
-
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
   // Your web app's Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyBJEqDDQ0SfHe96gEEdDkgiYVx_92D0Ek",
@@ -943,9 +943,40 @@ fadeEls.forEach(el => observer.observe(el));
     measurementId: "G-FEL6P5T20V"
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
+  
+  // 3. INITIALIZE FIRESTORE AND AUTH
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  // --- Handling the Login (Connecting the HTML elements) ---
+  const loginButton = document.getElementById('loginBtn');
+  const emailInput = document.getElementById('loginEmail');
+  const passwordInput = document.getElementById('loginPassword');
+
+  if (loginButton) {
+    loginButton.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      const email = emailInput.value;
+      const password = passwordInput.value;
+
+      // Log in securely via Firebase Auth
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          alert("Logged in successfully!");
+          
+          // Optional: Once logged in, you can pull profile data from Firestore using their unique ID
+          // const userDocRef = doc(db, "users", user.uid);
+        })
+        .catch((error) => {
+          console.error("Login Error: ", error.message);
+          alert("Error: " + error.message);
+        });
+    });
+  }
 </script>
 </body>
 </html>
