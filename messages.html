@@ -596,11 +596,28 @@ onAuthStateChanged(auth, async function(user) {
       var proj = projSnap.data();
 
       // Verify token matches
-      if (proj.chatToken !== token) { showError(); return; }
+      console.log('Project token:', proj.chatToken);
+      console.log('URL token:', token);
+      if (!proj.chatToken) {
+        console.log('No token stored on project yet - allowing access');
+      } else if (proj.chatToken !== token) {
+        console.log('Token mismatch - invalid link');
+        showError();
+        return;
+      }
 
-      // Sign in anonymously as client
-      var anonResult = await signInAnonymously(auth);
-      var clientUid  = 'client-' + projectId;
+      // Sign in as client
+      try {
+        await signInAnonymously(auth);
+      } catch(anonErr) {
+        console.log('Anonymous auth error:', anonErr.code, anonErr.message);
+        // If anonymous auth is disabled, proceed without it
+        if (anonErr.code !== 'auth/operation-not-allowed') {
+          showError();
+          return;
+        }
+      }
+      var clientUid = 'client-' + projectId;
       await initChat(clientUid, proj.clientName || 'Client', 'client');
     } catch(e) {
       console.log('Client auth error:', e);

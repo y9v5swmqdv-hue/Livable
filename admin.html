@@ -387,20 +387,27 @@ window.assignProject = async function(projectId) {
     var emailSent = false;
     if (EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID' && clientEmail) {
       try {
-        emailjs.init(EMAILJS_PUBLIC_KEY);
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-          to_email:     clientEmail,
-          to_name:      clientName,
-          student_name: studentName,
-          chat_link:    chatLink,
-          project_type: projectType,
-          from_name:    'Livable',
-          reply_to:     'hello@livable-design.com'
-        });
+        console.log('Sending via EmailJS to:', clientEmail);
+        emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+        var emailResp = await emailjs.send(
+          EMAILJS_SERVICE_ID,
+          EMAILJS_TEMPLATE_ID,
+          {
+            to_email:     clientEmail,
+            to_name:      clientName,
+            student_name: studentName,
+            chat_link:    chatLink,
+            project_type: projectType,
+            from_name:    'Livable',
+            reply_to:     'hello@livable-design.com'
+          }
+        );
+        console.log('EmailJS success:', emailResp.status, emailResp.text);
         emailSent = true;
-        toastPersistent('<strong>Project assigned to ' + studentName + '</strong><br>Email sent to ' + clientEmail);
+        toastPersistent('<strong>Assigned to ' + studentName + '</strong><br>Email sent to ' + clientEmail);
       } catch(emailErr) {
-        console.log('EmailJS error:', emailErr);
+        console.log('EmailJS FAILED - status:', emailErr.status, '- text:', emailErr.text);
+        console.log('Full error:', JSON.stringify(emailErr));
         emailSent = false;
       }
     }
