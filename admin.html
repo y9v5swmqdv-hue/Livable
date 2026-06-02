@@ -546,7 +546,7 @@ document.getElementById('adminLoginBtn')?.addEventListener('click', async () => 
   const password = document.getElementById('adminPassword').value;
   const errEl    = document.getElementById('adminErr');
   errEl.style.display = 'none';
-console.log(trying to log in with:, email);
+console.log("trying to log in with:", email);
 
   if (!ADMIN_EMAILS.includes(email)) {
     errEl.textContent   = 'This email is not authorised as an admin.';
