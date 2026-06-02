@@ -649,16 +649,16 @@ footer { background: var(--cream-dark); padding: 4rem 3rem; border-top: 1px soli
     </div>
     <div class="students-form fade-in fade-in-delay-2">
       <h3>Apply to Join Livable</h3>
-      <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" placeholder="Your full name"></div>
-      <div class="form-group"><label class="form-label">University Email</label><input type="email" class="form-input" placeholder="name@university.ac.uk"></div>
-      <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" placeholder="Create a secure password"></div>
+      <div class="form-group"><label class="form-label">Full Name</label><input type="text" id="regName" class="form-input" placeholder="Your full name"></div>
+      <div class="form-group"><label class="form-label">University Email</label><input type="email" id="regEmail" class="form-input" placeholder="name@university.ac.uk"></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" id="regPassword" class="form-input" placeholder="Create a secure password"></div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Year of Study</label><select class="form-select"><option value="">Select year</option><option>Year 1</option><option>Year 2</option><option>Year 3</option><option>Year 4</option><option>Postgraduate</option></select></div>
-        <div class="form-group"><label class="form-label">University Name</label><input type="text" class="form-input" placeholder="e.g. UAL, RCA..."></div>
+        <div class="form-group"><label class="form-label">Year of Study</label><select id="regYear" class="form-select"><option value="">Select year</option><option>Year 1</option><option>Year 2</option><option>Year 3</option><option>Year 4</option><option>Postgraduate</option></select></div>
+        <div class="form-group"><label class="form-label">University Name</label><input type="text" id="regUniversity" class="form-input" placeholder="e.g. UAL, RCA..."></div>
       </div>
       <div class="form-group"><label class="form-label">Upload Student ID</label><input type="file" class="form-input" accept="image/*,.pdf"></div>
       <div class="form-group"><label class="form-label">Upload Portfolio Samples</label><input type="file" class="form-input" accept="image/*,.pdf" multiple></div>
-      <button class="btn-primary" style="width:100%;margin-top:0.5rem;padding:1rem;">Apply to Join Livable</button>
+      <div id="reg-msg" style="font-size:0.78rem;margin-bottom:0.5rem;display:none;padding:0.5rem;"></div><button id="regBtn" class="btn-primary" style="width:100%;margin-top:0.2rem;padding:1rem;">Apply to Join Livable</button>
       <p class="form-note">Applications are reviewed by our team. You'll be notified within 48 hours.</p>
     </div>
   </div>
@@ -867,18 +867,22 @@ footer { background: var(--cream-dark); padding: 4rem 3rem; border-top: 1px soli
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div class="modal-title">Request a Design</div>
     <div class="modal-subtitle">One-time payment of £15–£25 · Delivered in 24–72 hours</div>
-    <div class="form-group"><label class="form-label">Upload Room Photos</label><input type="file" class="form-input" accept="image/*" multiple></div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Room Width (m)</label><input type="text" class="form-input" placeholder="e.g. 4.5"></div>
-      <div class="form-group"><label class="form-label">Room Length (m)</label><input type="text" class="form-input" placeholder="e.g. 6.2"></div>
+      <div class="form-group"><label class="form-label">Your Name</label><input type="text" id="reqClientName" class="form-input" placeholder="Your full name"></div>
+      <div class="form-group"><label class="form-label">Your Email</label><input type="email" id="reqClientEmail" class="form-input" placeholder="your@email.com"></div>
     </div>
-    <div class="form-group"><label class="form-label">Existing Furniture</label><textarea class="form-input form-textarea" placeholder="Describe what you currently have..."></textarea></div>
+    <div class="form-group"><label class="form-label">Upload Room Photos</label><input type="file" id="reqPhotos" class="form-input" accept="image/*" multiple></div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Budget Range</label><select class="form-select"><option>Under £200</option><option>£200–£500</option><option>£500–£1000</option><option>£1000–£2500</option><option>£2500+</option></select></div>
-      <div class="form-group"><label class="form-label">Preferred Colours</label><input type="text" class="form-input" placeholder="e.g. warm neutrals, sage..."></div>
+      <div class="form-group"><label class="form-label">Room Width (m)</label><input type="text" id="reqWidth" class="form-input" placeholder="e.g. 4.5"></div>
+      <div class="form-group"><label class="form-label">Room Length (m)</label><input type="text" id="reqLength" class="form-input" placeholder="e.g. 6.2"></div>
     </div>
-    <div class="form-group"><label class="form-label">Style Preference</label><select class="form-select"><option>Minimalist</option><option>Scandinavian</option><option>Industrial</option><option>Maximalist</option><option>Bohemian</option><option>Modern / Contemporary</option></select></div>
-    <div class="form-group"><label class="form-label">Items to Keep</label><textarea class="form-input form-textarea" placeholder="Pieces you'd like included in the design..."></textarea></div>
+    <div class="form-group"><label class="form-label">Existing Furniture</label><textarea id="reqFurniture" class="form-input form-textarea" placeholder="Describe what you currently have..."></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Budget Range</label><select id="reqBudget" class="form-select"><option>Under £200</option><option>£200–£500</option><option>£500–£1000</option><option>£1000–£2500</option><option>£2500+</option></select></div>
+      <div class="form-group"><label class="form-label">Preferred Colours</label><input type="text" id="reqColors" class="form-input" placeholder="e.g. warm neutrals, sage..."></div>
+    </div>
+    <div class="form-group"><label class="form-label">Style Preference</label><select id="reqStyle" class="form-select"><option>Minimalist</option><option>Scandinavian</option><option>Industrial</option><option>Maximalist</option><option>Bohemian</option><option>Modern / Contemporary</option></select></div>
+    <div class="form-group"><label class="form-label">Items to Keep</label><textarea id="reqKeep" class="form-input form-textarea" placeholder="Pieces you'd like included in the design..."></textarea></div>
     <div class="form-group"><label class="form-label">Payment Method</label>
       <div class="payment-btns">
         <button class="payment-btn">PayPal</button>
@@ -886,7 +890,7 @@ footer { background: var(--cream-dark); padding: 4rem 3rem; border-top: 1px soli
       </div>
     </div>
     <div class="consent-row"><input type="checkbox" id="portfolio-consent"><label for="portfolio-consent">I allow my completed design to appear in my designer's Livable portfolio. Photos will be anonymised.</label></div>
-    <button class="btn-primary" style="width:100%;padding:1.05rem;">Submit Request — from £15</button>
+    <div id="req-msg" style="font-size:0.78rem;margin-bottom:0.5rem;display:none;padding:0.5rem;"></div><button id="reqBtn" class="btn-primary" style="width:100%;padding:1.05rem;">Submit Request — from £15</button>
   </div>
 </div>
 
@@ -928,13 +932,19 @@ const observer = new IntersectionObserver((entries) => {
 fadeEls.forEach(el => observer.observe(el));
 </script>
 
+
+
 <script type="module">
-  import { initializeApp }                          from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword,
-           onAuthStateChanged }                     from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+import { initializeApp }             from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword,
+         createUserWithEmailAndPassword,
+         onAuthStateChanged }         from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+import { getFirestore, doc, setDoc,
+         addDoc, collection,
+         serverTimestamp }            from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
   const cfg = {
-    apiKey:            "AIzaSyBJEqDDQ0SfHe96gEEdDkgiBYvx_92DOEk",
+    apiKey:            "AIzaSyBJEqDDQ0SfHe96gEEdDkgiYVx_92D0Ek",
     authDomain:        "livable-8d80a.firebaseapp.com",
     projectId:         "livable-8d80a",
     storageBucket:     "livable-8d80a.firebasestorage.app",
@@ -943,50 +953,198 @@ fadeEls.forEach(el => observer.observe(el));
     measurementId:     "G-FEL6P5T20V"
   };
 
-  const app  = initializeApp(cfg);
-  const auth = getAuth(app);
+const app  = initializeApp(cfg);
+const auth = getAuth(app);
+const db   = getFirestore(app);
 
-  // Already signed-in? Skip straight to dashboard
-  onAuthStateChanged(auth, user => {
-    if (user) window.location.href = 'dashboard.html';
+// Already signed in → go to dashboard
+onAuthStateChanged(auth, user => {
+  if (user) window.location.href = 'dashboard.html';
+});
+
+// ── HELPERS ──
+function showMsg(id, msg, ok) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent     = msg;
+  el.style.display   = 'block';
+  el.style.color     = ok ? '#27ae60' : '#c0392b';
+  el.style.background= ok ? 'rgba(39,174,96,0.08)' : 'rgba(192,57,43,0.08)';
+}
+function hideMsg(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+}
+
+// ══════════════════════════════════════════
+// STUDENT LOGIN
+// ══════════════════════════════════════════
+const loginBtn = document.getElementById('loginBtn');
+if (loginBtn) {
+  loginBtn.addEventListener('click', async e => {
+    e.preventDefault();
+    hideMsg('login-error');
+    const email    = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    if (!email || !password) {
+      showMsg('login-error', 'Please enter your email and password.', false);
+      return;
+    }
+    loginBtn.textContent = 'Logging in…';
+    loginBtn.disabled    = true;
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      window.location.href = 'dashboard.html';
+    } catch(err) {
+      const msgs = {
+        'auth/user-not-found':    'No account found with that email.',
+        'auth/wrong-password':    'Incorrect password.',
+        'auth/invalid-email':     'Please enter a valid email address.',
+        'auth/too-many-requests': 'Too many attempts. Please try again later.',
+        'auth/invalid-credential':'Incorrect email or password.'
+      };
+      showMsg('login-error', msgs[err.code] || err.message, false);
+      loginBtn.textContent = 'Login';
+      loginBtn.disabled    = false;
+    }
   });
+}
 
-  const btn    = document.getElementById('loginBtn');
-  const errBox = document.getElementById('login-error');
+// ══════════════════════════════════════════
+// STUDENT REGISTRATION
+// ══════════════════════════════════════════
+const regBtn = document.getElementById('regBtn');
+if (regBtn) {
+  regBtn.addEventListener('click', async e => {
+    e.preventDefault();
+    hideMsg('reg-msg');
 
-  if (btn) {
-    btn.addEventListener('click', async e => {
-      e.preventDefault();
-      const email    = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value;
-      errBox.style.display = 'none';
+    const name       = document.getElementById('regName')?.value.trim();
+    const email      = document.getElementById('regEmail')?.value.trim();
+    const password   = document.getElementById('regPassword')?.value;
+    const year       = document.getElementById('regYear')?.value;
+    const university = document.getElementById('regUniversity')?.value.trim();
 
-      if (!email || !password) {
-        errBox.textContent = 'Please enter your email and password.';
-        errBox.style.display = 'block';
-        return;
-      }
+    if (!name || !email || !password || !year || !university) {
+      showMsg('reg-msg', 'Please fill in all required fields.', false);
+      return;
+    }
+    if (password.length < 6) {
+      showMsg('reg-msg', 'Password must be at least 6 characters.', false);
+      return;
+    }
 
-      btn.textContent = 'Logging in…';
-      btn.disabled    = true;
+    regBtn.textContent = 'Submitting…';
+    regBtn.disabled    = true;
 
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = 'dashboard.html';
-      } catch (err) {
-        const msgs = {
-          'auth/user-not-found':  'No account found with that email.',
-          'auth/wrong-password':  'Incorrect password.',
-          'auth/invalid-email':   'Please enter a valid email address.',
-          'auth/too-many-requests': 'Too many attempts. Try again later.'
-        };
-        errBox.textContent     = msgs[err.code] || err.message;
-        errBox.style.display   = 'block';
-        btn.textContent        = 'Login';
-        btn.disabled           = false;
-      }
-    });
-  }
+    try {
+      // Create Firebase Auth account
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const uid  = cred.user.uid;
+
+      // Save student profile to Firestore with pending_approval status
+      await setDoc(doc(db, 'students', uid), {
+        name,
+        email,
+        university,
+        yearOfStudy:       year,
+        status:            'pending_approval',
+        rating:            0,
+        reviewCount:       0,
+        totalEarnings:     0,
+        completedProjects: 0,
+        createdAt:         serverTimestamp()
+      });
+
+      // Sign them out — they need approval before accessing the dashboard
+      await auth.signOut();
+
+      showMsg('reg-msg',
+        'Application submitted! Our team will review it and email you within 48 hours.',
+        true
+      );
+      regBtn.textContent = 'Application Sent';
+
+    } catch(err) {
+      const msgs = {
+        'auth/email-already-in-use': 'An account with this email already exists.',
+        'auth/invalid-email':        'Please enter a valid university email.',
+        'auth/weak-password':        'Password must be at least 6 characters.'
+      };
+      showMsg('reg-msg', msgs[err.code] || err.message, false);
+      regBtn.textContent = 'Apply to Join Livable';
+      regBtn.disabled    = false;
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+// CLIENT REQUEST FORM
+// ══════════════════════════════════════════
+const reqBtn = document.getElementById('reqBtn');
+if (reqBtn) {
+  reqBtn.addEventListener('click', async e => {
+    e.preventDefault();
+    hideMsg('req-msg');
+
+    const clientName  = document.getElementById('reqClientName')?.value.trim();
+    const clientEmail = document.getElementById('reqClientEmail')?.value.trim();
+    const width       = document.getElementById('reqWidth')?.value.trim();
+    const length      = document.getElementById('reqLength')?.value.trim();
+    const furniture   = document.getElementById('reqFurniture')?.value.trim();
+    const budget      = document.getElementById('reqBudget')?.value;
+    const colors      = document.getElementById('reqColors')?.value.trim();
+    const style       = document.getElementById('reqStyle')?.value;
+    const keep        = document.getElementById('reqKeep')?.value.trim();
+    const portfolio   = document.getElementById('portfolio-consent')?.checked;
+
+    if (!clientName || !clientEmail) {
+      showMsg('req-msg', 'Please enter your name and email address.', false);
+      return;
+    }
+    if (!width || !length) {
+      showMsg('req-msg', 'Please enter your room dimensions.', false);
+      return;
+    }
+
+    reqBtn.textContent = 'Submitting…';
+    reqBtn.disabled    = true;
+
+    try {
+      // Save request to Firestore projects collection
+      const ref = await addDoc(collection(db, 'projects'), {
+        clientName,
+        clientEmail,
+        roomType:          style + ' Room',
+        dimensions:        { width: parseFloat(width) || 0, length: parseFloat(length) || 0 },
+        existingFurniture: furniture || '',
+        budget,
+        preferredColors:   colors || '',
+        style,
+        itemsToKeep:       keep || '',
+        portfolioConsent:  portfolio || false,
+        status:            'unassigned',   // admin assigns to a student
+        studentId:         null,
+        price:             null,
+        createdAt:         serverTimestamp(),
+        deadline:          null
+      });
+
+      showMsg('req-msg',
+        'Request received! We will match you with a designer and be in touch within 24 hours.',
+        true
+      );
+      reqBtn.textContent = 'Request Sent ✓';
+
+    } catch(err) {
+      showMsg('req-msg', 'Something went wrong: ' + err.message, false);
+      reqBtn.textContent = 'Submit Request — from £15';
+      reqBtn.disabled    = false;
+    }
+  });
+}
 </script>
 </body>
 </html>
