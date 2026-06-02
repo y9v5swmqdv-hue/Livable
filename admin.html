@@ -469,7 +469,7 @@ window.rejectStudent = async function(uid) {
 onAuthStateChanged(auth, async user => {
   document.getElementById('loadingScreen').style.display = 'none';
 
-  if (!user || !ADMIN_EMAILS.includes(user.email)) {
+  if (!user) {
     document.getElementById('loginGate').style.display = 'flex';
     document.getElementById('adminUI').style.display   = 'none';
 
