@@ -369,13 +369,14 @@ window.assignProject = async function(projectId) {
 
     // Save to Firestore
     await updateDoc(doc(db, 'projects', projectId), {
-      studentId:   uid,
-      studentName: student ? student.name : '',
-      status:      'pending',
-      assignedAt:  serverTimestamp(),
-      deadline:    deadline,
-      chatToken:   token,
-      chatLink:    chatLink
+      studentId:    uid,
+      studentName:  student ? student.name : '',
+      status:       'awaiting_payment',
+      assignedAt:   serverTimestamp(),
+      deadline:     deadline,
+      chatToken:    token,
+      chatLink:     chatLink,
+      checkoutLink: checkoutLink
     });
 
     var clientEmail = proj.clientEmail || '';
@@ -393,13 +394,14 @@ window.assignProject = async function(projectId) {
           EMAILJS_SERVICE_ID,
           EMAILJS_TEMPLATE_ID,
           {
-            to_email:     clientEmail,
-            to_name:      clientName,
-            student_name: studentName,
-            chat_link:    chatLink,
-            project_type: projectType,
-            from_name:    'Livable',
-            reply_to:     'hello@livable-design.com'
+            to_email:      clientEmail,
+            to_name:       clientName,
+            student_name:  studentName,
+            chat_link:     chatLink,
+            checkout_link: checkoutLink,
+            project_type:  projectType,
+            from_name:     'Livable',
+            reply_to:      'hello@livable-design.com'
           }
         );
         console.log('EmailJS success:', emailResp.status, emailResp.text);
@@ -417,10 +419,11 @@ window.assignProject = async function(projectId) {
       copyToClipboard(chatLink);
       toastPersistent(
         '<strong>Assigned to ' + studentName + '</strong><br>' +
-        'Email not set up yet. Link copied to clipboard.<br>' +
-        '<span style="font-size:0.75rem;opacity:0.8">Send to ' + (clientEmail || 'client') + ':</span><br>' +
-        '<span style="font-size:0.72rem;opacity:0.7;word-break:break-all">' + chatLink + '</span>'
+        'Email not set up - copy links below.<br>' +
+        '<span style="font-size:0.72rem;opacity:0.8">Payment link: ' + checkoutLink + '</span><br>' +
+        '<span style="font-size:0.72rem;opacity:0.8">Chat link: ' + chatLink + '</span>'
       );
+      copyToClipboard(checkoutLink);
     }
 
     if (btn) { btn.textContent = 'Assigned'; }
