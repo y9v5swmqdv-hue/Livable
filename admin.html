@@ -359,7 +359,8 @@ window.assignProject = async function(projectId) {
   var student  = studentsCache[uid];
   var deadline = new Date(Date.now() + 72 * 60 * 60 * 1000);
   var token    = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
-  var chatLink = window.location.origin + '/messages.html?project=' + projectId + '&token=' + token;
+  var chatLink     = window.location.origin + '/messages.html?project=' + projectId + '&token=' + token;
+  var checkoutLink = window.location.origin + '/checkout.html?project=' + projectId;
 
   try {
     // Get project data for client email
