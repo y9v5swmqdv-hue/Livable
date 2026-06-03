@@ -502,7 +502,7 @@ async function checkPaymentStatus() {
     return;
   }
 
-  // Populate order summary
+  // Populate order summary and pre-fill form from project data
   if (projectData) {
     document.getElementById('summaryStyle').textContent  = projectData.style || '-';
     var dims = projectData.dimensions
@@ -510,6 +510,16 @@ async function checkPaymentStatus() {
       : '-';
     document.getElementById('summarySize').textContent   = dims;
     document.getElementById('summaryClient').textContent = projectData.clientName || '-';
+
+    // Pre-fill name and email so client does not have to enter them again
+    if (projectData.clientName) {
+      var nameParts = projectData.clientName.split(' ');
+      document.getElementById('firstName').value = nameParts[0] || '';
+      document.getElementById('lastName').value  = nameParts.slice(1).join(' ') || '';
+    }
+    if (projectData.clientEmail) {
+      document.getElementById('payEmail').value = projectData.clientEmail;
+    }
   }
 
   updatePriceDisplay();

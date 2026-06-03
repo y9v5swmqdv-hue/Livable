@@ -1,13 +1,12 @@
-const functions = require('firebase-functions/v2/https');
-const admin     = require('firebase-admin');
+const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
 const { defineSecret } = require('firebase-functions/params');
+const admin = require('firebase-admin');
 
 admin.initializeApp();
 const db = admin.firestore();
 
-// Define secrets using the new params approach
-const stripeSecret      = defineSecret('STRIPE_SECRET');
-const stripeWebhookSec  = defineSecret('STRIPE_WEBHOOK_SECRET');
+const stripeSecret     = defineSecret('STRIPE_SECRET');
+const stripeWebhookSec = defineSecret('STRIPE_WEBHOOK_SECRET');
 
 const PLATFORM_FEE = 0.20;
 
@@ -17,25 +16,25 @@ const VALID_AMOUNTS = {
 };
 
 // ── CREATE PAYMENT INTENT ──
-exports.createPaymentIntent = functions.onCall(
+exports.createPaymentIntent = onCall(
   { region: 'europe-west1', secrets: [stripeSecret] },
   async (request) => {
     const { projectId, amount, currency, tier } = request.data;
 
     if (!projectId || !amount || !currency || !tier) {
-      throw new functions.HttpsError('invalid-argument', 'Missing required fields.');
+      throw new HttpsError('invalid-argument', 'Missing required fields.');
     }
 
     const expectedAmount = VALID_AMOUNTS[currency] && VALID_AMOUNTS[currency][tier];
     if (!expectedAmount || amount !== expectedAmount) {
-      throw new functions.HttpsError('invalid-argument', 'Invalid amount for tier.');
+      throw new HttpsError('invalid-argument', 'Invalid amount for tier.');
     }
 
     const stripe = require('stripe')(stripeSecret.value());
 
     const projSnap = await db.collection('projects').doc(projectId).get();
     if (!projSnap.exists) {
-      throw new functions.HttpsError('not-found', 'Project not found.');
+      throw new HttpsError('not-found', 'Project not found.');
     }
     const proj = projSnap.data();
 
@@ -71,11 +70,10 @@ exports.createPaymentIntent = functions.onCall(
 );
 
 // ── STRIPE WEBHOOK ──
-exports.stripeWebhook = functions.onRequest(
+exports.stripeWebhook = onRequest(
   { region: 'europe-west1', secrets: [stripeSecret, stripeWebhookSec] },
   async (req, res) => {
-    const sig = req.headers['stripe-signature'];
-
+    const sig    = req.headers['stripe-signature'];
     const stripe = require('stripe')(stripeSecret.value());
 
     let event;
