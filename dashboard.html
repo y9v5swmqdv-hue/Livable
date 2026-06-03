@@ -605,15 +605,18 @@ onAuthStateChanged(auth, async function(user) {
   const completed= studentData.completedProjects || 0;
   const initStr  = initials(name);
 
-  // Hide loading screen
-  document.getElementById('loadingScreen').style.display = 'none';
-
-  // Check if student is approved
+  // Check approval status BEFORE hiding loading screen
   if (studentData.status === 'pending_approval') {
-    document.getElementById('loadingScreen').style.background = 'var(--cream)';
-    document.getElementById('loadingScreen').innerHTML = '<img style="height:52px;margin-bottom:1.5rem" src="' + document.querySelector('.loading-logo').src + '" alt="Livable"><div style="font-family:Lora,serif;font-size:1.1rem;color:#5C6B2E;text-align:center;max-width:340px;line-height:1.6;padding:0 1rem">Your application is under review.<br><span style=\"font-size:0.85rem;color:#8A8A72\">We will email you within 48 hours once approved.</span></div><a href=\"/" style=\"font-size:0.78rem;color:#5C6B2E;text-transform:uppercase;letter-spacing:0.1em;margin-top:1rem;display:block\">Back to Livable</a>';
+    var ls = document.getElementById('loadingScreen');
+    ls.style.background = '#FAF3E0';
+    ls.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:1.2rem;padding:2rem;text-align:center;max-width:400px">'
+      + '<div style="font-family:Lora,Georgia,serif;font-size:1.5rem;font-weight:400;color:#5C6B2E">Application Under Review</div>'
+      + '<div style="font-size:0.9rem;color:#5A5A46;line-height:1.7">Your application is being reviewed by our team. You will receive an email within 48 hours once approved.</div>'
+      + '<a href="/" style="font-size:0.78rem;color:#5C6B2E;text-transform:uppercase;letter-spacing:0.1em;border:1px solid #5C6B2E;padding:0.6rem 1.5rem;margin-top:0.5rem">Back to Livable</a>'
+      + '</div>';
     return;
   }
+
   if (studentData.status === 'rejected') {
     alert('Your application was not approved. Please contact hello@livable-design.com for more information.');
     await signOut(auth);
@@ -621,23 +624,11 @@ onAuthStateChanged(auth, async function(user) {
     return;
   }
 
-  // Hide loading screen
+  // All good - hide loading screen and show dashboard
   document.getElementById('loadingScreen').style.display = 'none';
-
-  // Check if student is approved
-  if (studentData.status === 'pending_approval') {
-    document.getElementById('loadingScreen').style.background = 'var(--cream)';
-    document.getElementById('loadingScreen').innerHTML = '<img style="height:52px;margin-bottom:1.5rem" src="' + document.querySelector('.loading-logo').src + '" alt="Livable"><div style="font-family:Lora,serif;font-size:1.1rem;color:#5C6B2E;text-align:center;max-width:340px;line-height:1.6;padding:0 1rem">Your application is under review.<br><span style=\"font-size:0.85rem;color:#8A8A72\">We will email you within 48 hours once approved.</span></div><a href=\"/" style=\"font-size:0.78rem;color:#5C6B2E;text-transform:uppercase;letter-spacing:0.1em;margin-top:1rem;display:block\">Back to Livable</a>';
-    return;
-  }
-  if (studentData.status === 'rejected') {
-    alert('Your application was not approved. Please contact hello@livable-design.com for more information.');
-    await signOut(auth);
-    window.location.href = '/';
-    return;
-  }
 
   // Populate header
+
   document.getElementById('navAvatar').textContent    = initStr;
   document.getElementById('navName').textContent      = name;
   document.getElementById('navUniv').textContent      = univ || user.email;
