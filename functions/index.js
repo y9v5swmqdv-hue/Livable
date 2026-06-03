@@ -17,7 +17,13 @@ const VALID_AMOUNTS = {
 
 // ── CREATE PAYMENT INTENT ──
 exports.createPaymentIntent = onCall(
-  { region: 'europe-west1', secrets: [stripeSecret] },
+  {
+    region:               'europe-west1',
+    secrets:              [stripeSecret],
+    cors:                 ['https://livable-design.com', 'http://localhost:5500'],
+    invoker:              'public',
+    allowInvalidAppCheckToken: true
+  },
   async (request) => {
     const { projectId, amount, currency, tier } = request.data;
 
@@ -71,7 +77,11 @@ exports.createPaymentIntent = onCall(
 
 // ── STRIPE WEBHOOK ──
 exports.stripeWebhook = onRequest(
-  { region: 'europe-west1', secrets: [stripeSecret, stripeWebhookSec] },
+  {
+    region:  'europe-west1',
+    secrets: [stripeSecret, stripeWebhookSec],
+    invoker: 'public'
+  },
   async (req, res) => {
     const sig    = req.headers['stripe-signature'];
     const stripe = require('stripe')(stripeSecret.value());
