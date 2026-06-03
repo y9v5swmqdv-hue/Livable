@@ -561,7 +561,6 @@ var authTimeout = setTimeout(function() {
 
 onAuthStateChanged(auth, async function(user) {
   clearTimeout(authTimeout);
-  document.getElementById('loadingScreen').style.display = 'none';
 
   if (!user) {
     window.location.href = '/';
@@ -605,29 +604,37 @@ onAuthStateChanged(auth, async function(user) {
   const completed= studentData.completedProjects || 0;
   const initStr  = initials(name);
 
-  // Check approval status BEFORE hiding loading screen
-  if (studentData.status === 'pending_approval') {
-    var ls = document.getElementById('loadingScreen');
-    ls.style.background = '#FAF3E0';
-    ls.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:1.2rem;padding:2rem;text-align:center;max-width:400px">'
-      + '<div style="font-family:Lora,Georgia,serif;font-size:1.5rem;font-weight:400;color:#5C6B2E">Application Under Review</div>'
-      + '<div style="font-size:0.9rem;color:#5A5A46;line-height:1.7">Your application is being reviewed by our team. You will receive an email within 48 hours once approved.</div>'
-      + '<a href="/" style="font-size:0.78rem;color:#5C6B2E;text-transform:uppercase;letter-spacing:0.1em;border:1px solid #5C6B2E;padding:0.6rem 1.5rem;margin-top:0.5rem">Back to Livable</a>'
-      + '</div>';
-    return;
-  }
+  // Check approval status using real-time listener
+  // This means the screen auto-updates the moment admin approves
+  var statusUnsub = onSnapshot(studentRef, function(statusSnap) {
+    var currentStatus = statusSnap.exists() ? statusSnap.data().status : 'pending_approval';
 
-  if (studentData.status === 'rejected') {
-    alert('Your application was not approved. Please contact hello@livable-design.com for more information.');
-    await signOut(auth);
-    window.location.href = '/';
-    return;
-  }
+    if (currentStatus === 'pending_approval') {
+      var ls = document.getElementById('loadingScreen');
+      ls.style.display = 'flex';
+      ls.style.background = '#FAF3E0';
+      ls.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:1.4rem;padding:2.5rem;text-align:center;max-width:420px">'
+        + '<div style="font-family:Lora,Georgia,serif;font-size:1.8rem;font-weight:400;color:#5C6B2E">Application Under Review</div>'
+        + '<div style="font-size:0.88rem;color:#5A5A46;line-height:1.75">Your application is being reviewed by our team.<br>This page will automatically unlock once you are approved.<br><span style=\"font-size:0.8rem;color:#8A8A72\">Usually within 1-48 hours.</span></div>'
+        + '<div style="width:36px;height:36px;border:2px solid rgba(92,107,46,0.2);border-top-color:#5C6B2E;border-radius:50%;animation:spin 1s linear infinite"></div>'
+        + '<a href="/" style="font-size:0.76rem;color:#5C6B2E;text-transform:uppercase;letter-spacing:0.1em;margin-top:0.5rem;opacity:0.7">Back to Livable</a>'
+        + '</div>';
+      return;
+    }
 
-  // All good - hide loading screen and show dashboard
-  document.getElementById('loadingScreen').style.display = 'none';
+    if (currentStatus === 'rejected') {
+      statusUnsub();
+      alert('Your application was not approved. Please contact hello@livable-design.com');
+      signOut(auth);
+      window.location.href = '/';
+      return;
+    }
 
-  // Populate header
+    // Status is active - stop listening and show dashboard
+    statusUnsub();
+    document.getElementById('loadingScreen').style.display = 'none';
+
+    // Populate header
 
   document.getElementById('navAvatar').textContent    = initStr;
   document.getElementById('navName').textContent      = name;
@@ -723,11 +730,12 @@ onAuthStateChanged(auth, async function(user) {
   });
 
   // ── LOGOUT ──
-  document.getElementById('logoutBtn').addEventListener('click', async () => {
-    await signOut(auth);
-    window.location.href = '/';
-  });
-});
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = '/';
+    });
+  }); // end onSnapshot status listener
+}); // end onAuthStateChanged
 </script>
 </body>
 </html>

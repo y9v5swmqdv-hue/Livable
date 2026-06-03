@@ -9,8 +9,14 @@
     ],
     "rewrites": []
   },
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs20"
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "runtime": "nodejs20"
+    }
+  ],
+  "firestore": {
+    "rules": "firestore.rules"
   }
 }
