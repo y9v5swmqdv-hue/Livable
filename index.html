@@ -953,7 +953,7 @@ import { getAuth, signInWithEmailAndPassword,
          createUserWithEmailAndPassword,
          onAuthStateChanged }         from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 import { getFirestore, doc, setDoc,
-         addDoc, collection,
+         getDoc, addDoc, collection,
          serverTimestamp }            from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
   const cfg = {
@@ -970,9 +970,27 @@ const app  = initializeApp(cfg);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-// Already signed in → go to dashboard
-onAuthStateChanged(auth, user => {
-  if (user) window.location.href = 'dashboard.html';
+// Flag prevents redirect during registration
+var isRegistering = false;
+
+// Already signed in - check status before redirecting
+onAuthStateChanged(auth, async function(user) {
+  if (isRegistering) return;
+  if (!user) return;
+  try {
+    var snap = await getDoc(doc(db, 'students', user.uid));
+    if (snap.exists() && snap.data().status === 'pending_approval') {
+      // Show a message instead of redirecting
+      var loginBtn = document.getElementById('loginBtn');
+      if (loginBtn) {
+        showMsg('login-error', 'Your application is still under review. You will be notified once approved.', true);
+        loginBtn.textContent = 'Login';
+        loginBtn.disabled = false;
+      }
+      return;
+    }
+  } catch(e) {}
+  window.location.href = '/dashboard.html';
 });
 
 // ── HELPERS ──
@@ -1033,6 +1051,7 @@ if (regBtn) {
   regBtn.addEventListener('click', async e => {
     e.preventDefault();
     hideMsg('reg-msg');
+    isRegistering = true;
 
     const name       = document.getElementById('regName')?.value.trim();
     const email      = document.getElementById('regEmail')?.value.trim();
@@ -1083,6 +1102,7 @@ if (regBtn) {
       // Sign them out — they need approval before accessing the dashboard
       await auth.signOut();
 
+      isRegistering = false;
       showMsg('reg-msg',
         'Application submitted! Our team will review it and email you within 48 hours.',
         true

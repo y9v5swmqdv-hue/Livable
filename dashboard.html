@@ -366,10 +366,9 @@ import { getAuth, onAuthStateChanged,
 import { getFirestore, doc, getDoc,
          setDoc, updateDoc,
          collection, query, where,
-         onSnapshot, orderBy,
-         serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+         onSnapshot, serverTimestamp,
+         getDocs }                  from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
-// ── CONFIG ──
 const cfg = {
   apiKey:            "AIzaSyBJEqDDQ0SfHe96gEEdDkgiBYvx_92DOEk",
   authDomain:        "livable-8d80a.firebaseapp.com",
@@ -385,357 +384,314 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 
 // ── HELPERS ──
-function toast(msg, dur = 3000) {
-  const t = document.getElementById('toast');
+function toast(msg, dur) {
+  dur = dur || 3000;
+  var t = document.getElementById("toast");
   t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), dur);
+  t.classList.add("show");
+  setTimeout(function() { t.classList.remove("show"); }, dur);
 }
 
-function hide(id) { const el=document.getElementById(id); if(el) el.style.display='none'; }
-function show(id, d='block') { const el=document.getElementById(id); if(el) el.style.display=d; }
-function setText(id, val) { const el=document.getElementById(id); if(el) el.textContent=val; }
+function setText(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
 
-function initials(name='') {
-  return name.split(' ').map(w=>w[0]||'').slice(0,2).join('').toUpperCase() || '?';
+function initials(name) {
+  name = name || "";
+  return name.split(" ").map(function(w) { return w[0] || ""; }).slice(0,2).join("").toUpperCase() || "?";
 }
 
 function formatDate(ts) {
-  if (!ts) return '';
-  const d = ts.toDate ? ts.toDate() : new Date(ts);
-  return d.toLocaleDateString('en-GB', {day:'numeric', month:'short'});
-}
-
-function starsStr(rating) {
-  const r = Math.round(rating || 0);
-  return '★'.repeat(r) + '☆'.repeat(5-r);
+  if (!ts) return "";
+  var d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString("en-GB", {day:"numeric", month:"short"});
 }
 
 function tierLabel(reviews, rating) {
-  if (reviews >= 75 && rating >= 4.9) return 'Tier 04 — Top Designer';
-  if (reviews >= 30 && rating >= 4.7) return 'Tier 03 — Advanced Designer';
-  if (reviews >= 10 && rating >= 4.5) return 'Tier 02 — Growing Designer';
-  return 'Tier 01 — New Designer';
+  if (reviews >= 75 && rating >= 4.9) return "Tier 04 - Top Designer";
+  if (reviews >= 30 && rating >= 4.7) return "Tier 03 - Advanced Designer";
+  if (reviews >= 10 && rating >= 4.5) return "Tier 02 - Growing Designer";
+  return "Tier 01 - New Designer";
 }
 
-// ── RENDER PENDING PROJECT CARD ──
-function renderPendingCard(docSnap) {
-  const d  = docSnap.data();
-  const id = docSnap.id;
-  const div = document.createElement('div');
-  div.className = 'project-card';
-  div.id = 'proj-' + id;
+// ── SHOW PENDING SCREEN ──
+function showPendingScreen() {
+  var ls = document.getElementById("loadingScreen");
+  ls.style.display = "flex";
+  ls.style.background = "#FAF3E0";
+  ls.style.flexDirection = "column";
+  ls.style.alignItems = "center";
+  ls.style.justifyContent = "center";
+  ls.style.gap = "1.4rem";
+  ls.style.padding = "2rem";
+  ls.style.textAlign = "center";
+  ls.innerHTML =
+    "<img style='height:52px;margin-bottom:0.5rem' src='" + document.querySelector(".loading-logo").src + "' alt='Livable'>" +
+    "<div style='font-family:Lora,Georgia,serif;font-size:1.6rem;font-weight:400;color:#5C6B2E'>Application Under Review</div>" +
+    "<div style='font-size:0.88rem;color:#5A5A46;line-height:1.75;max-width:380px'>Your application is being reviewed by our team.<br>This page will automatically unlock once you are approved.<br><span style=\'font-size:0.8rem;color:#8A8A72\'>Usually within 1-48 hours.</span></div>" +
+    "<div style='width:32px;height:32px;border:2px solid rgba(92,107,46,0.2);border-top-color:#5C6B2E;border-radius:50%;animation:spin 1s linear infinite'></div>" +
+    "<a href='/' style='font-size:0.76rem;color:#5C6B2E;text-transform:uppercase;letter-spacing:0.1em;margin-top:0.5rem;opacity:0.7'>Back to Livable</a>";
+}
 
-  const daysLeft = d.deadline
-    ? Math.ceil((d.deadline.toDate() - new Date()) / 86400000)
-    : null;
-  const deadlineHTML = daysLeft !== null
-    ? `<div class="deadline-tag ${daysLeft <= 2 ? 'soon' : ''}">
-         Respond by: ${formatDate(d.deadline)}${daysLeft <= 2 ? ' — Soon!' : ''}
-       </div>`
-    : '';
+// ── SHOW REJECTED SCREEN ──
+function showRejectedScreen() {
+  alert("Your application was not approved. Please contact hello@livable-design.com for more information.");
+  signOut(auth);
+  window.location.href = "/";
+}
 
-  div.innerHTML = `
-    <div class="proj-client">${d.clientName || 'Client'}</div>
-    <div class="proj-title">${d.roomType || 'Room Design'}</div>
-    <div class="proj-meta">
-      ${d.style    ? `<span class="proj-tag">${d.style}</span>`  : ''}
-      ${d.budget   ? `<span class="proj-tag">Budget: ${d.budget}</span>` : ''}
-      ${d.price    ? `<span class="proj-tag">£${d.price}</span>` : ''}
-    </div>
-    <div class="proj-actions">
-      <button class="btn-accept" data-id="${id}">Accept</button>
-      <button class="btn-decline" data-id="${id}">Decline</button>
-    </div>
-    ${deadlineHTML}
-  `;
+// ── RENDER PROJECT CARDS ──
+function renderPendingCard(d, id) {
+  var daysLeft = d.deadline ? Math.ceil((d.deadline.toDate() - new Date()) / 86400000) : null;
+  var deadlineHTML = daysLeft !== null ? "<div class='deadline-tag" + (daysLeft <= 2 ? " soon" : "") + "'>Due: " + formatDate(d.deadline) + " - " + daysLeft + " day(s) left</div>" : "";
+  var div = document.createElement("div");
+  div.className = "project-card";
+  div.id = "proj-" + id;
+  div.innerHTML =
+    "<div class='proj-client'>" + (d.clientName || "Client") + "</div>" +
+    "<div class='proj-title'>" + (d.roomType || d.style || "Room Design") + "</div>" +
+    "<div class='proj-meta'>" +
+      (d.style  ? "<span class='proj-tag'>" + d.style + "</span>" : "") +
+      (d.budget ? "<span class='proj-tag'>Budget: " + d.budget + "</span>" : "") +
+    "</div>" +
+    "<div class='proj-actions'>" +
+      "<button class='btn-accept' data-id='" + id + "'>Accept</button>" +
+      "<button class='btn-decline' data-id='" + id + "'>Decline</button>" +
+    "</div>" +
+    deadlineHTML;
 
-  div.querySelector('.btn-accept').addEventListener('click', async () => {
+  div.querySelector(".btn-accept").addEventListener("click", async function() {
+    var pid = this.dataset.id;
     try {
-      await updateDoc(doc(db, 'projects', id), { status: 'active' });
-      toast('Project accepted! Good luck ✦');
-    } catch(e) { toast('Error: ' + e.message); }
+      await updateDoc(doc(db, "projects", pid), { status: "active" });
+      toast("Project accepted!");
+    } catch(e) { toast("Error: " + e.message); }
   });
 
-  div.querySelector('.btn-decline').addEventListener('click', async () => {
-    if (!confirm('Decline this project request?')) return;
+  div.querySelector(".btn-decline").addEventListener("click", async function() {
+    var pid = this.dataset.id;
+    if (!confirm("Decline this request?")) return;
     try {
-      await updateDoc(doc(db, 'projects', id), { status: 'declined' });
-      toast('Request declined.');
-    } catch(e) { toast('Error: ' + e.message); }
+      await updateDoc(doc(db, "projects", pid), { status: "declined" });
+      toast("Request declined.");
+    } catch(e) { toast("Error: " + e.message); }
   });
 
   return div;
 }
 
-// ── RENDER ACTIVE PROJECT CARD ──
-function renderActiveCard(docSnap) {
-  const d  = docSnap.data();
-  const id = docSnap.id;
-  const div = document.createElement('div');
-  div.className = 'project-card';
+function renderActiveCard(d, id) {
+  var daysLeft = d.deadline ? Math.ceil((d.deadline.toDate() - new Date()) / 86400000) : null;
+  var deadlineHTML = daysLeft !== null ? "<div class='deadline-tag" + (daysLeft <= 2 ? " soon" : "") + "'>Due: " + formatDate(d.deadline) + " - " + daysLeft + " day(s) left</div>" : "";
+  var div = document.createElement("div");
+  div.className = "project-card";
+  div.innerHTML =
+    "<div class='proj-client'>" + (d.clientName || "Client") + "</div>" +
+    "<div class='proj-title'>" + (d.roomType || d.style || "Room Design") + "</div>" +
+    "<div class='proj-meta'>" +
+      (d.style  ? "<span class='proj-tag'>" + d.style + "</span>" : "") +
+      (d.budget ? "<span class='proj-tag'>Budget: " + d.budget + "</span>" : "") +
+    "</div>" +
+    "<div class='proj-actions'>" +
+      "<button class='btn-message' data-id='" + id + "'>Message Client</button>" +
+      "<button class='btn-accept' data-id='" + id + "' style='background:var(--green)'>Mark Done</button>" +
+    "</div>" +
+    deadlineHTML;
 
-  const daysLeft = d.deadline
-    ? Math.ceil((d.deadline.toDate() - new Date()) / 86400000)
-    : null;
-  const deadlineHTML = daysLeft !== null
-    ? `<div class="deadline-tag ${daysLeft <= 2 ? 'soon' : ''}">
-         Due: ${formatDate(d.deadline)} — ${daysLeft} day${daysLeft !== 1 ? 's' : ''} left
-       </div>`
-    : '';
-
-  div.innerHTML = `
-    <div class="proj-client">${d.clientName || 'Client'}</div>
-    <div class="proj-title">${d.roomType || 'Room Design'}</div>
-    <div class="proj-meta">
-      ${d.style  ? `<span class="proj-tag">${d.style}</span>`  : ''}
-      ${d.budget ? `<span class="proj-tag">Budget: ${d.budget}</span>` : ''}
-      ${d.price  ? `<span class="proj-tag">£${d.price}</span>` : ''}
-    </div>
-    <div class="proj-actions">
-      <button class="btn-message" data-id="${id}">Message Client</button>
-      <button class="btn-accept" data-id="${id}" style="background:var(--green)">Mark Done</button>
-    </div>
-    ${deadlineHTML}
-  `;
-
-  div.querySelector('.btn-message').addEventListener('click', () => {
-    window.location.href = `messages.html?project=${id}`;
+  div.querySelector(".btn-message").addEventListener("click", function() {
+    window.location.href = "messages.html?project=" + this.dataset.id;
   });
 
-  div.querySelector('[style*="green"]').addEventListener('click', async () => {
-    if (!confirm('Mark this project as completed?')) return;
+  div.querySelector("[style*='green']").addEventListener("click", async function() {
+    var pid = this.dataset.id;
+    if (!confirm("Mark this project as completed?")) return;
     try {
-      await updateDoc(doc(db, 'projects', id), {
-        status: 'completed',
+      await updateDoc(doc(db, "projects", pid), {
+        status: "completed",
         completedAt: serverTimestamp()
       });
-      toast('Project marked as complete!');
-    } catch(e) { toast('Error: ' + e.message); }
+      toast("Project marked complete!");
+    } catch(e) { toast("Error: " + e.message); }
   });
 
   return div;
 }
 
-// ── RENDER MESSAGE ROW ──
-function renderMessageRow(docSnap, uid) {
-  const d  = docSnap.data();
-  const isUnread = d.unreadByStudent === true;
-  const row = document.createElement('div');
-  row.className = 'message-row';
+function emptyState(icon, title, sub) {
+  return "<div class='empty-state'><div class='empty-icon'>" + icon + "</div><div class='empty-title'>" + title + "</div><div class='empty-sub'>" + sub + "</div></div>";
+}
 
-  const otherName = d.clientName || 'Client';
-  const init = initials(otherName);
-
-  row.innerHTML = `
-    <div class="msg-avatar">${init}</div>
-    <div class="msg-info">
-      <div class="msg-name">${otherName}</div>
-      <div class="msg-preview">${d.lastMessage || 'No messages yet'}</div>
-    </div>
-    <div class="msg-time">${d.lastMessageAt ? formatDate(d.lastMessageAt) : ''}</div>
-    ${isUnread ? '<div class="msg-unread"></div>' : ''}
-  `;
-
-  row.addEventListener('click', () => {
-    window.location.href = `messages.html?project=${docSnap.id}`;
+function renderMessageRow(d, id) {
+  var row = document.createElement("div");
+  row.className = "message-row";
+  var isUnread = d.unreadByStudent === true;
+  var otherName = d.clientName || "Client";
+  var init = (otherName[0] || "C").toUpperCase();
+  var lastTime = d.lastMessageAt ? formatDate(d.lastMessageAt) : "";
+  row.innerHTML =
+    "<div class='msg-avatar'>" + init + "</div>" +
+    "<div class='msg-info'><div class='msg-name'>" + otherName + "</div>" +
+    "<div class='msg-preview'>" + (d.lastMessage || "No messages yet") + "</div></div>" +
+    "<div class='msg-time'>" + lastTime + "</div>" +
+    (isUnread ? "<div class='msg-unread'></div>" : "");
+  row.addEventListener("click", function() {
+    window.location.href = "messages.html?project=" + id;
   });
-
   return row;
 }
 
-// ── EMPTY STATE ──
-function emptyState(icon, title, sub) {
-  return `<div class="empty-state">
-    <div class="empty-icon">${icon}</div>
-    <div class="empty-title">${title}</div>
-    <div class="empty-sub">${sub}</div>
-  </div>`;
+// ── LOAD DASHBOARD ──
+function loadDashboard(user, studentData) {
+  var name      = studentData.name || user.email.split("@")[0];
+  var univ      = studentData.university || "";
+  var rating    = studentData.rating || 0;
+  var reviews   = studentData.reviewCount || 0;
+  var earnings  = studentData.totalEarnings || 0;
+  var completed = studentData.completedProjects || 0;
+  var initStr   = initials(name);
+
+  // Hide loading screen - student is approved
+  document.getElementById("loadingScreen").style.display = "none";
+
+  // Populate nav + profile
+  document.getElementById("navAvatar").textContent  = initStr;
+  document.getElementById("navName").textContent    = name;
+  document.getElementById("navUniv").textContent    = univ || user.email;
+  document.getElementById("welcomeName").textContent = name.split(" ")[0];
+  document.getElementById("welcomeSub").textContent  = univ ? univ + " - Your projects at a glance." : "Your projects and earnings at a glance.";
+  document.getElementById("profileAvatar").textContent = initStr;
+  document.getElementById("profileName").textContent   = name;
+  document.getElementById("profileDetail").textContent = [univ, studentData.yearOfStudy].filter(Boolean).join(" - ") || user.email;
+  document.getElementById("starsDisplay").textContent  = rating ? rating.toFixed(1) + " *" : "No ratings yet";
+  document.getElementById("ratingCount").textContent   = "(" + reviews + " review" + (reviews !== 1 ? "s" : "") + ")";
+  document.getElementById("tierLabel").textContent     = tierLabel(reviews, rating);
+
+  // Stats
+  setText("statRating",      rating ? rating.toFixed(1) : "-");
+  setText("statRatingSub",   reviews + " review" + (reviews !== 1 ? "s" : ""));
+  setText("statEarnings",    "GBP " + earnings);
+  setText("statEarningsSub", completed + " completed project" + (completed !== 1 ? "s" : ""));
+  setText("earnTotal",       "GBP " + earnings);
+  setText("earnCompleted",   completed);
+  setText("earnAvg",         completed > 0 ? "GBP " + Math.round(earnings / completed) : "GBP 0");
+
+  // Pending projects
+  var pendingQ = query(collection(db, "projects"), where("studentId", "==", user.uid), where("status", "==", "pending"));
+  onSnapshot(pendingQ, function(snap) {
+    var list  = document.getElementById("pendingList");
+    var badge = document.getElementById("pendingBadge");
+    badge.textContent = snap.size;
+    setText("statPending", snap.size);
+    if (snap.empty) {
+      list.innerHTML = emptyState("📋", "No pending requests", "New client requests will appear here.");
+      return;
+    }
+    list.innerHTML = "";
+    snap.forEach(function(d) { list.appendChild(renderPendingCard(d.data(), d.id)); });
+  });
+
+  // Active projects
+  var activeQ = query(collection(db, "projects"), where("studentId", "==", user.uid), where("status", "==", "active"));
+  onSnapshot(activeQ, function(snap) {
+    var list  = document.getElementById("activeList");
+    var badge = document.getElementById("activeBadge");
+    badge.textContent = snap.size;
+    setText("statActive", snap.size);
+    if (snap.empty) {
+      list.innerHTML = emptyState("✦", "No active projects", "Accept a pending request to get started.");
+      return;
+    }
+    list.innerHTML = "";
+    snap.forEach(function(d) { list.appendChild(renderActiveCard(d.data(), d.id)); });
+  });
+
+  // Messages
+  var msgQ = query(collection(db, "conversations"), where("participants", "array-contains", user.uid));
+  onSnapshot(msgQ, function(snap) {
+    var container = document.getElementById("messageList");
+    var badge     = document.getElementById("msgBadge");
+    var unread    = snap.docs.filter(function(d) { return d.data().unreadByStudent; }).length;
+    badge.textContent = unread || snap.size;
+    if (snap.empty) {
+      container.innerHTML = "<div class='section-body'>" + emptyState("💬", "No messages yet", "Messages appear here once a project is active.") + "</div>";
+      return;
+    }
+    container.innerHTML = "";
+    snap.docs.forEach(function(d) {
+      container.appendChild(renderMessageRow(d.data(), d.id));
+    });
+  });
+
+  // Logout
+  document.getElementById("logoutBtn").addEventListener("click", async function() {
+    await signOut(auth);
+    window.location.href = "/";
+  });
 }
 
 // ── MAIN AUTH LISTENER ──
-// If auth takes more than 6 seconds redirect to login
-var authTimeout = setTimeout(function() {
-  window.location.href = '/';
-}, 6000);
-
 onAuthStateChanged(auth, async function(user) {
-  clearTimeout(authTimeout);
-
   if (!user) {
-    window.location.href = '/';
+    window.location.href = "/";
     return;
   }
 
-  // ── Load student profile ──
-  const studentRef  = doc(db, 'students', user.uid);
-  let   studentData = {};
+  // Load student profile from Firestore
+  var studentRef = doc(db, "students", user.uid);
+  var studentData = {};
 
   try {
-    const snap = await getDoc(studentRef);
+    var snap = await getDoc(studentRef);
     if (snap.exists()) {
       studentData = snap.data();
     } else {
-      // First login — create skeleton profile
+      // No profile found - create one as pending_approval (safety net)
       studentData = {
-        email:             user.email,
-        name:              user.displayName || user.email.split('@')[0],
-        university:        '',
-        yearOfStudy:       '',
-        rating:            0,
-        reviewCount:       0,
-        totalEarnings:     0,
-        completedProjects: 0,
-        status:            'active',
-        createdAt:         serverTimestamp()
+        email: user.email,
+        name:  user.displayName || user.email.split("@")[0],
+        university: "", yearOfStudy: "",
+        rating: 0, reviewCount: 0,
+        totalEarnings: 0, completedProjects: 0,
+        status: "pending_approval",
+        createdAt: serverTimestamp()
       };
       await setDoc(studentRef, studentData);
     }
   } catch(e) {
-    console.warn('Profile load error:', e.message);
-    studentData.name = user.displayName || user.email.split('@')[0];
+    console.log("Profile load error:", e.message);
+    // If Firestore fails, redirect to home rather than showing broken dashboard
+    window.location.href = "/";
+    return;
   }
 
-  const name     = studentData.name   || user.email.split('@')[0];
-  const univ     = studentData.university || '';
-  const rating   = studentData.rating || 0;
-  const reviews  = studentData.reviewCount || 0;
-  const earnings = studentData.totalEarnings || 0;
-  const completed= studentData.completedProjects || 0;
-  const initStr  = initials(name);
+  var status = studentData.status || "pending_approval";
 
-  // Check approval status using real-time listener
-  // This means the screen auto-updates the moment admin approves
-  var statusUnsub = onSnapshot(studentRef, function(statusSnap) {
-    var currentStatus = statusSnap.exists() ? statusSnap.data().status : 'pending_approval';
-
-    if (currentStatus === 'pending_approval') {
-      var ls = document.getElementById('loadingScreen');
-      ls.style.display = 'flex';
-      ls.style.background = '#FAF3E0';
-      ls.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:1.4rem;padding:2.5rem;text-align:center;max-width:420px">'
-        + '<div style="font-family:Lora,Georgia,serif;font-size:1.8rem;font-weight:400;color:#5C6B2E">Application Under Review</div>'
-        + '<div style="font-size:0.88rem;color:#5A5A46;line-height:1.75">Your application is being reviewed by our team.<br>This page will automatically unlock once you are approved.<br><span style=\"font-size:0.8rem;color:#8A8A72\">Usually within 1-48 hours.</span></div>'
-        + '<div style="width:36px;height:36px;border:2px solid rgba(92,107,46,0.2);border-top-color:#5C6B2E;border-radius:50%;animation:spin 1s linear infinite"></div>'
-        + '<a href="/" style="font-size:0.76rem;color:#5C6B2E;text-transform:uppercase;letter-spacing:0.1em;margin-top:0.5rem;opacity:0.7">Back to Livable</a>'
-        + '</div>';
-      return;
-    }
-
-    if (currentStatus === 'rejected') {
-      statusUnsub();
-      alert('Your application was not approved. Please contact hello@livable-design.com');
-      signOut(auth);
-      window.location.href = '/';
-      return;
-    }
-
-    // Status is active - stop listening and show dashboard
-    statusUnsub();
-    document.getElementById('loadingScreen').style.display = 'none';
-
-    // Populate header
-
-  document.getElementById('navAvatar').textContent    = initStr;
-  document.getElementById('navName').textContent      = name;
-  document.getElementById('navUniv').textContent      = univ || user.email;
-  document.getElementById('welcomeName').textContent  = name.split(' ')[0];
-  document.getElementById('welcomeSub').textContent   =
-    univ ? `${univ} · Your projects and earnings at a glance.`
-         : 'Your projects and earnings at a glance.';
-
-  document.getElementById('profileAvatar').textContent = initStr;
-  document.getElementById('profileName').textContent   = name;
-  document.getElementById('profileDetail').textContent =
-    [univ, studentData.yearOfStudy].filter(Boolean).join(' · ') || user.email;
-  document.getElementById('starsDisplay').textContent  = starsStr(rating);
-  document.getElementById('ratingCount').textContent   = `(${reviews} review${reviews !== 1 ? 's' : ''})`;
-  document.getElementById('tierLabel').textContent     = tierLabel(reviews, rating);
-
-  // Stats
-  setText('statRating',  rating ? rating.toFixed(1) : '—');
-  setText('statRatingSub', `${reviews} review${reviews !== 1 ? 's' : ''}`);
-  setText('statEarnings', `£${earnings}`);
-  setText('statEarningsSub', `${completed} completed project${completed !== 1 ? 's' : ''}`);
-  setText('earnTotal',     `£${earnings}`);
-  setText('earnCompleted', completed);
-  setText('earnAvg',       completed > 0 ? `£${Math.round(earnings/completed)}` : '£0');
-
-  // Hide loading screen
-  document.getElementById('loadingScreen').style.display = 'none';
-
-  // ── Real-time: PENDING PROJECTS ──
-  const pendingQ = query(
-    collection(db, 'projects'),
-    where('studentId', '==', user.uid),
-    where('status', '==', 'pending')
-  );
-  onSnapshot(pendingQ, snap => {
-    const list = document.getElementById('pendingList');
-    const badge = document.getElementById('pendingBadge');
-    badge.textContent = snap.size;
-    setText('statPending', snap.size);
-
-    if (snap.empty) {
-      list.innerHTML = emptyState('📋', 'No pending requests', 'New client requests will appear here. Check back soon.');
-      return;
-    }
-    list.innerHTML = '';
-    snap.forEach(d => list.appendChild(renderPendingCard(d)));
-  });
-
-  // ── Real-time: ACTIVE PROJECTS ──
-  const activeQ = query(
-    collection(db, 'projects'),
-    where('studentId', '==', user.uid),
-    where('status', '==', 'active')
-  );
-  onSnapshot(activeQ, snap => {
-    const list  = document.getElementById('activeList');
-    const badge = document.getElementById('activeBadge');
-    badge.textContent = snap.size;
-    setText('statActive', snap.size);
-
-    if (snap.empty) {
-      list.innerHTML = emptyState('✦', 'No active projects', 'Accept a pending request to start your first project.');
-      return;
-    }
-    list.innerHTML = '';
-    snap.forEach(d => list.appendChild(renderActiveCard(d)));
-  });
-
-  // ── Real-time: MESSAGES ──
-  const msgQ = query(
-    collection(db, 'conversations'),
-    where('participants', 'array-contains', user.uid)
-  );
-  onSnapshot(msgQ, snap => {
-    const container = document.getElementById('messageList');
-    const badge     = document.getElementById('msgBadge');
-    const unread    = snap.docs.filter(d => d.data().unreadByStudent).length;
-    badge.textContent = unread || snap.size;
-
-    if (snap.empty) {
-      container.innerHTML = `<div class="section-body">${emptyState('💬', 'No messages yet', 'Messages with your clients will appear here once a project is active.')}</div>`;
-      return;
-    }
-    container.innerHTML = '';
-    // Sort by last message time
-    const sorted = snap.docs.sort((a, b) => {
-      const ta = a.data().lastMessageAt?.toMillis() || 0;
-      const tb = b.data().lastMessageAt?.toMillis() || 0;
-      return tb - ta;
+  if (status === "pending_approval") {
+    showPendingScreen();
+    // Watch for approval in real time
+    var unsub = onSnapshot(studentRef, function(statusSnap) {
+      if (!statusSnap.exists()) return;
+      var newStatus = statusSnap.data().status;
+      if (newStatus === "active") {
+        unsub();
+        loadDashboard(user, statusSnap.data());
+      } else if (newStatus === "rejected") {
+        unsub();
+        showRejectedScreen();
+      }
     });
-    sorted.slice(0, 6).forEach(d => container.appendChild(renderMessageRow(d, user.uid)));
-  });
+    return;
+  }
 
-  // ── LOGOUT ──
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      await signOut(auth);
-      window.location.href = '/';
-    });
-  }); // end onSnapshot status listener
-}); // end onAuthStateChanged
+  if (status === "rejected") {
+    showRejectedScreen();
+    return;
+  }
+
+  // Status is active - load dashboard
+  loadDashboard(user, studentData);
+});
 </script>
 </body>
 </html>
